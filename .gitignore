@@ -1,0 +1,41 @@
+### Spring Boot & Maven (Ajustado) ###
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+### STS & Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+
+### VS Code ###
+.vscode/
+
+### Logs & OS ###
+*.log
+log/
+.DS_Store
+Thumbs.db
+
+### Segurança (Banco de Dados & Spring AI) ###
+.env
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
