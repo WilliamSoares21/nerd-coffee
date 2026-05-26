@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import jakarta.annotation.PostConstruct;
 import java.util.Base64;
 import java.util.Date;
 
@@ -16,11 +17,23 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.coffe.secret}")
     private String jwtSecretBase64;
 
     @Value("${jwt.expiration:86400000}")
     private long jwtExpirationMs;
+
+    @PostConstruct
+    public void init() {
+        log.info("=== JWT PROVIDER INITIALIZED ===");
+        log.info("JWT Secret Base64 length: {} chars", jwtSecretBase64 != null ? jwtSecretBase64.length() : 0);
+        if (jwtSecretBase64 != null && jwtSecretBase64.length() > 0) {
+            String preview = jwtSecretBase64.substring(0, Math.min(20, jwtSecretBase64.length()));
+            log.info("JWT Secret preview (first 20 chars): {}", preview);
+        } else {
+            log.warn("JWT Secret is NULL or EMPTY!");
+        }
+    }
 
     /**
      * Decodifica a chave Base64 e converte para SecretKey
@@ -28,6 +41,8 @@ public class JwtProvider {
      */
     private SecretKey getSigningKey() {
         try {
+            log.debug("JWT Secret Length: {} chars, Value: {}", jwtSecretBase64.length(), 
+                      jwtSecretBase64.substring(0, Math.min(20, jwtSecretBase64.length())) + "...");
             byte[] decodedKey = Base64.getDecoder().decode(jwtSecretBase64);
             
             if (decodedKey.length < 64) {
