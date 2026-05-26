@@ -8,6 +8,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -21,77 +24,78 @@ import java.util.List;
 @Builder
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @NotBlank(message = "Nome é obrigatório")
-    @Column(nullable = false)
-    private String name;
+  @NotBlank(message = "Nome é obrigatório")
+  @Column(nullable = false)
+  private String name;
 
-    @Email(message = "Email deve ser válido")
-    @NotBlank(message = "Email é obrigatório")
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Email(message = "Email deve ser válido")
+  @NotBlank(message = "Email é obrigatório")
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
-    @Column(nullable = false)
-    private String password;
+  @NotBlank(message = "Senha é obrigatória")
+  @Column(nullable = false)
+  private String password;
 
-    @Column(nullable = false)
-    private Boolean active = true;
+  @Column(nullable = false)
+  private Boolean active = true;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
+  @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(nullable = false)
+  private UserRole role;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Article> articles;
+  @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  private List<Article> articles;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
+    updatedAt = LocalDateTime.now();
+  }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.getAuthority()));
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.getAuthority()));
+  }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+  @Override
+  public String getUsername() {
+    return email;
+  }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return active;
-    }
+  @Override
+  public boolean isEnabled() {
+    return active;
+  }
 }
