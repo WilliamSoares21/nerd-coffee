@@ -3,6 +3,7 @@ package com.nerdcoffe.controller;
 import com.nerdcoffe.dto.ApiResponseDto;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
+import com.nerdcoffe.dto.PageResponseDto;
 import com.nerdcoffe.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -73,33 +74,36 @@ public class ArticleController {
 
     @GetMapping("/public/all")
     @Operation(summary = "Listar todos os artigos publicados", description = "Retorna uma lista paginada de todos os artigos publicados")
-    public ResponseEntity<ApiResponseDto<Page<ArticleDto>>> getAllPublishedArticles(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getAllPublishedArticles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("GET /api/v1/articles/public/all?page={}&size={}", page, size);
         Page<ArticleDto> articles = articleService.getAllPublishedArticles(page, size);
-        return ResponseEntity.ok(ApiResponseDto.success(articles, "Artigos recuperados com sucesso"));
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }
 
     @GetMapping("/public/search")
     @Operation(summary = "Pesquisar artigos publicados", description = "Pesquisa artigos publicados por título")
-    public ResponseEntity<ApiResponseDto<Page<ArticleDto>>> searchPublishedArticles(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> searchPublishedArticles(
             @RequestParam String title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("GET /api/v1/articles/public/search?title={}&page={}&size={}", title, page, size);
         Page<ArticleDto> articles = articleService.searchPublishedArticles(title, page, size);
-        return ResponseEntity.ok(ApiResponseDto.success(articles, "Busca realizada com sucesso"));
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Busca realizada com sucesso"));
     }
 
     @GetMapping("/my-articles")
     @SecurityRequirement(name = "bearer-jwt")
     @Operation(summary = "Meus artigos", description = "Retorna todos os artigos criados pelo usuário autenticado")
-    public ResponseEntity<ApiResponseDto<Page<ArticleDto>>> getMyArticles(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getMyArticles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("GET /api/v1/articles/my-articles?page={}&size={}", page, size);
         Page<ArticleDto> articles = articleService.getMyArticles(page, size);
-        return ResponseEntity.ok(ApiResponseDto.success(articles, "Artigos recuperados com sucesso"));
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }
 }
