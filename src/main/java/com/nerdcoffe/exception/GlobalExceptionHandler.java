@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponseDto<?>> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponseDto<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         log.error("Validation error");
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponseDto.error("Erro de validação: " + errors));
+                .body(ApiResponseDto.error("Falha de validação", errors));
     }
 
     @ExceptionHandler(Exception.class)

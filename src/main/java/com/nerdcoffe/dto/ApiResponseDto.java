@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +18,7 @@ public class ApiResponseDto<T> {
     private Boolean success;
     private String message;
     private T data;
+    private Map<String, String> errors;
     private LocalDateTime timestamp;
 
     public static <T> ApiResponseDto<T> success(T data, String message) {
@@ -36,6 +38,15 @@ public class ApiResponseDto<T> {
         return ApiResponseDto.<T>builder()
                 .success(false)
                 .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    public static ApiResponseDto<Void> error(String message, Map<String, String> errors) {
+        return ApiResponseDto.<Void>builder()
+                .success(false)
+                .message(message)
+                .errors(errors)
                 .timestamp(LocalDateTime.now())
                 .build();
     }
