@@ -66,6 +66,42 @@ cd nerd-coffee
 cd /home/punk/projetos/nerd-coffee
 ```
 
+### Passo 1.1: Configuração do Ambiente Local e Variáveis de Segurança
+
+**Motivo:** o projeto utiliza variáveis de ambiente para manter credenciais e chaves criptográficas fora do repositório. Por isso, arquivos sensíveis (como `.env` ou `application-dev.properties`) são ignorados pelo `.gitignore` e não são versionados.
+
+Crie um arquivo local `.env` (ou exporte manualmente no terminal) com as chaves obrigatórias:
+
+```bash
+DATABASE_URL=jdbc:postgresql://localhost:5432/coffe_nerd_dev
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
+JWT_SECRET=<sua-string-base64>
+```
+
+**Nota técnica sobre `JWT_SECRET`:** a aplicação usa o algoritmo **HS512**. Gere obrigatoriamente uma string Base64 com **no mínimo 64 bytes**:
+
+```bash
+openssl rand -base64 64 | tr -d '\n'
+```
+
+Exemplo de execução injetando as variáveis:
+
+```bash
+source .env
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+```
+
+Ou exportando manualmente:
+
+```bash
+export DATABASE_URL=jdbc:postgresql://localhost:5432/coffe_nerd_dev
+export DATABASE_USERNAME=postgres
+export DATABASE_PASSWORD=postgres
+export JWT_SECRET="<sua-string-base64>"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+```
+
 ### Passo 2: Inicie o PostgreSQL com Docker
 
 ```bash
