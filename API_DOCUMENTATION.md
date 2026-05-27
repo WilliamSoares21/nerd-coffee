@@ -60,6 +60,8 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
     "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
     "type": "Bearer",
     "expiresIn": 86400000,
+    "userId": 1,
+    "roles": ["ROLE_VIEWER"],
     "user": {
       "id": 1,
       "name": "João Silva",
@@ -90,7 +92,7 @@ curl -X GET http://localhost:8080/api/v1/articles/my-articles \
 ### Listar Artigos Publicados (Público)
 
 ```bash
-curl -X GET 'http://localhost:8080/api/v1/articles/public/all?page=0&size=10'
+curl -X GET 'http://localhost:8080/api/v1/articles/public?page=0&size=10'
 ```
 
 **Parâmetros**:
@@ -109,6 +111,7 @@ curl -X GET 'http://localhost:8080/api/v1/articles/public/all?page=0&size=10'
         "title": "Guia Spring Boot",
         "content": "Conteúdo...",
         "summary": "Resumo...",
+        "tags": ["spring", "java"],
         "author": {
           "id": 2,
           "name": "Admin",
@@ -152,6 +155,7 @@ curl -X GET http://localhost:8080/api/v1/articles/1
     "title": "Guia Spring Boot",
     "content": "Conteúdo completo...",
     "summary": "Resumo...",
+    "tags": ["spring", "java"],
     "author": {...},
     "published": true,
     "createdAt": "2026-05-25T10:00:00",
@@ -173,7 +177,8 @@ curl -X POST http://localhost:8080/api/v1/articles \
   -d '{
     "title": "Meu Novo Artigo",
     "content": "Conteúdo detalhado do artigo aqui...",
-    "summary": "Um resumo breve"
+    "summary": "Um resumo breve",
+    "tags": ["spring", "java"]
   }'
 ```
 
@@ -187,6 +192,7 @@ curl -X POST http://localhost:8080/api/v1/articles \
     "title": "Meu Novo Artigo",
     "content": "Conteúdo...",
     "summary": "Resumo...",
+    "tags": ["spring", "java"],
     "author": {
       "id": 1,
       "name": "João Silva",
@@ -212,7 +218,8 @@ curl -X PUT http://localhost:8080/api/v1/articles/5 \
   -d '{
     "title": "Título Atualizado",
     "content": "Conteúdo atualizado...",
-    "summary": "Resumo atualizado"
+    "summary": "Resumo atualizado",
+    "tags": ["spring", "java"]
   }'
 ```
 
@@ -346,7 +353,8 @@ ARTICLE=$(curl -s -X POST http://localhost:8080/api/v1/articles \
   -d '{
     "title": "Como Usar Spring Boot",
     "content": "Spring Boot é um framework fantástico...",
-    "summary": "Guia completo de Spring Boot"
+    "summary": "Guia completo de Spring Boot",
+    "tags": ["spring", "java"]
   }')
 
 ARTICLE_ID=$(echo "$ARTICLE" | jq -r '.data.id')
