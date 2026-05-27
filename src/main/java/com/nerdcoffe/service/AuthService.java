@@ -12,11 +12,14 @@ import com.nerdcoffe.repository.UserRepository;
 import com.nerdcoffe.security.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -77,6 +80,9 @@ public class AuthService {
         // Carrega o UserDetails através do Spring Security para garantir
         // que a interface UserDetails seja respeitada pelo JwtProvider
         UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
         
         String token = jwtProvider.generateToken(userDetails);
         log.info("Login bem-sucedido para usuário: {}", user.getId());
@@ -85,6 +91,8 @@ public class AuthService {
                 .token(token)
                 .type("Bearer")
                 .expiresIn(jwtProvider.getExpirationMs())
+                .userId(user.getId())
+                .roles(roles)
                 .user(mapToDto(user))
                 .build();
     }

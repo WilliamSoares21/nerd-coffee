@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -13,5 +15,7 @@ public class LoginResponseDto {
     private String token;
     private String type = "Bearer";
     private Long expiresIn;
+    private Long userId;
+    private List<String> roles;
     private UserDto user;
 }
