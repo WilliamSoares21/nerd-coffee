@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -23,4 +25,6 @@ public class CreateArticleDto {
 
     @Size(max = 500, message = "Resumo não pode exceder 500 caracteres")
     private String summary;
+
+    private List<String> tags;
 }

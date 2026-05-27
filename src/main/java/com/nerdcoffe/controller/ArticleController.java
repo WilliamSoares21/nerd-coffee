@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,13 +74,22 @@ public class ArticleController {
         return ResponseEntity.ok(ApiResponseDto.success(articleDto));
     }
 
+    @GetMapping("/public")
+    @Operation(summary = "Listar artigos publicados (rota pública)", description = "Retorna uma lista paginada de artigos publicados")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getPublishedArticles(
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/public?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.getAllPublishedArticles(pageable);
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
+    }
+
     @GetMapping("/public/all")
     @Operation(summary = "Listar todos os artigos publicados", description = "Retorna uma lista paginada de todos os artigos publicados")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getAllPublishedArticles(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("GET /api/v1/articles/public/all?page={}&size={}", page, size);
-        Page<ArticleDto> articles = articleService.getAllPublishedArticles(page, size);
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/public/all?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.getAllPublishedArticles(pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }
@@ -87,10 +98,9 @@ public class ArticleController {
     @Operation(summary = "Pesquisar artigos publicados", description = "Pesquisa artigos publicados por título")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> searchPublishedArticles(
             @RequestParam String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("GET /api/v1/articles/public/search?title={}&page={}&size={}", title, page, size);
-        Page<ArticleDto> articles = articleService.searchPublishedArticles(title, page, size);
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/public/search?title={}&page={}&size={}", title, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.searchPublishedArticles(title, pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Busca realizada com sucesso"));
     }
@@ -99,10 +109,9 @@ public class ArticleController {
     @SecurityRequirement(name = "bearer-jwt")
     @Operation(summary = "Meus artigos", description = "Retorna todos os artigos criados pelo usuário autenticado")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getMyArticles(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("GET /api/v1/articles/my-articles?page={}&size={}", page, size);
-        Page<ArticleDto> articles = articleService.getMyArticles(page, size);
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/my-articles?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.getMyArticles(pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "articles")
@@ -36,6 +38,12 @@ public class Article {
 
     @Column(nullable = false)
     private Boolean published = false;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"))
+    @Column(name = "tag", nullable = false)
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

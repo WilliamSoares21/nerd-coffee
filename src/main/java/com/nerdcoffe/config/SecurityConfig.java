@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/**").hasRole("EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/**").hasAnyRole("EDITOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/articles/**").hasRole("EDITOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/articles/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
