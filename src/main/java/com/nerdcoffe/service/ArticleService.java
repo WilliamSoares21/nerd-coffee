@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -228,9 +229,20 @@ public class ArticleService {
 
   private ArticleDto mapToDto(Article article, Long currentUserId) {
     Long upvoteCount = articleUpvoteRepository.countByArticleId(article.getId());
-    Boolean userUpvoted = currentUserId != null 
-        ? articleUpvoteRepository.existsByArticleAndUser(article.getId(), currentUserId)
-        : false;
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    boolean isAuthenticated = authentication != null
+        && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+    boolean isUpvoted = false;
+
+    if (isAuthenticated) {
+      Long userId = currentUserId;
+      if (userId == null) {
+        User currentUser = getCurrentUser();
+        userId = currentUser.getId();
+      }
+      isUpvoted = articleUpvoteRepository.existsByArticleIdAndUserId(article.getId(), userId);
+    }
 
     return ArticleDto.builder()
         .id(article.getId())
@@ -249,7 +261,7 @@ public class ArticleService {
         .updatedAt(article.getUpdatedAt())
         .publishedAt(article.getPublishedAt())
         .upvoteCount(upvoteCount)
-        .userUpvoted(userUpvoted)
+        .userUpvoted(isUpvoted)
         .build();
   }
 

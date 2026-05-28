@@ -39,4 +39,14 @@ public interface ArticleUpvoteRepository extends JpaRepository<ArticleUpvote, Lo
      */
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM ArticleUpvote a WHERE a.article.id = :articleId AND a.user.id = :userId")
     boolean existsByArticleAndUser(@Param("articleId") Long articleId, @Param("userId") Long userId);
+
+    /**
+     * Verifica se um usuário deu upvote em um artigo específico.
+     *
+     * @param articleId ID do artigo
+     * @param userId    ID do usuário
+     * @return true se o usuário deu upvote, false caso contrário
+     */
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM ArticleUpvote a WHERE a.article.id = :articleId AND a.user.id = :userId")
+    boolean existsByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId);
 }
