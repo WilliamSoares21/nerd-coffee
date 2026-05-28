@@ -4,6 +4,7 @@ import com.nerdcoffe.dto.ApiResponseDto;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
 import com.nerdcoffe.dto.PageResponseDto;
+import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -64,6 +65,19 @@ public class ArticleController {
         log.info("PATCH /api/v1/articles/{}/publish", id);
         ArticleDto articleDto = articleService.publishArticle(id);
         return ResponseEntity.ok(ApiResponseDto.success(articleDto, "Artigo publicado com sucesso"));
+    }
+
+    @PostMapping("/{id}/upvote")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(
+            summary = "Dar/remover upvote em artigo",
+            description = "Funciona como um toggle: adiciona upvote se o usuário ainda não deu, ou remove se já tiver dado. " +
+                    "Disponível para todos os usuários autenticados (VIEWER, EDITOR, ADMIN)"
+    )
+    public ResponseEntity<ApiResponseDto<UpvoteResponseDto>> toggleUpvote(@PathVariable Long id) {
+        log.info("POST /api/v1/articles/{}/upvote", id);
+        UpvoteResponseDto response = articleService.toggleUpvote(id);
+        return ResponseEntity.ok(ApiResponseDto.success(response, response.getMessage()));
     }
 
     @GetMapping("/{id}")

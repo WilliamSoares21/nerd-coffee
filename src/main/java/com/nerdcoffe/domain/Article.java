@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "articles")
@@ -53,6 +55,10 @@ public class Article {
 
     @Column
     private LocalDateTime publishedAt;
+
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ArticleUpvote> upvotes = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

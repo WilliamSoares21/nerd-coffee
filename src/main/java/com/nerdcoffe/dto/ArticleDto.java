@@ -1,5 +1,6 @@
 package com.nerdcoffe.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,4 +24,10 @@ public class ArticleDto {
   private LocalDateTime updatedAt;
   private LocalDateTime publishedAt;
   private List<String> tags;
+
+  @JsonProperty("upvoteCount")
+  private Long upvoteCount;
+
+  @JsonProperty("userUpvoted")
+  private Boolean userUpvoted;
 }
