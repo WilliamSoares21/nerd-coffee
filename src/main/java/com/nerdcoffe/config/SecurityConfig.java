@@ -83,9 +83,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/**").hasAnyRole("EDITOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/articles/**").hasRole("EDITOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/articles/**").hasRole("ADMIN")
+                        // Endpoint de upvote: qualquer usuário autenticado pode dar/remover upvote
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/upvote").authenticated()
+                        // Criar artigo: qualquer usuário autenticado pode criar
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles").authenticated()
+                        // Editar artigo: validação de autorização feita na service (apenas autor ou admin)
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/articles/**").authenticated()
+                        // Deletar artigo: validação de autorização feita na service (apenas autor ou admin)
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/articles/**").authenticated()
+                        // PATCH (publish): validação de autorização feita na service (apenas autor ou admin)
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/articles/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
