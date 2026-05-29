@@ -136,11 +136,11 @@ public class ArticleService {
   }
 
   @Transactional(readOnly = true)
-  public Page<ArticleDto> getAllPublishedArticles(Pageable pageable) {
-    log.info("Buscando todos os artigos publicados. Page: {}, Size: {}", pageable.getPageNumber(),
+  public Page<ArticleDto> getAllPublishedArticles(String tag, Pageable pageable) {
+    log.info("Buscando todos os artigos publicados com tag: {}. Page: {}, Size: {}", tag, pageable.getPageNumber(),
         pageable.getPageSize());
     Long currentUserId = getCurrentUserIdOrNull();
-    return articleRepository.findAllPublished(pageable)
+    return articleRepository.findAllPublished(tag, pageable)
         .map(article -> mapToDto(article, currentUserId));
   }
 
