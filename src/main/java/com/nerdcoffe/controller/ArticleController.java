@@ -91,11 +91,12 @@ public class ArticleController {
     }
 
     @GetMapping("/public")
-    @Operation(summary = "Listar artigos publicados (rota pública)", description = "Retorna uma lista paginada de artigos publicados")
+    @Operation(summary = "Listar artigos publicados (rota pública)", description = "Retorna uma lista paginada de artigos publicados com filtro opcional de tag")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getPublishedArticles(
+            @RequestParam(required = false) String tag,
             @PageableDefault(size = 10) Pageable pageable) {
-        log.info("GET /api/v1/articles/public?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
-        Page<ArticleDto> articles = articleService.getAllPublishedArticles(pageable);
+        log.info("GET /api/v1/articles/public?page={}&size={}&tag={}", pageable.getPageNumber(), pageable.getPageSize(), tag);
+        Page<ArticleDto> articles = articleService.getAllPublishedArticles(tag, pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }
@@ -105,7 +106,7 @@ public class ArticleController {
     public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getAllPublishedArticles(
             @PageableDefault(size = 10) Pageable pageable) {
         log.info("GET /api/v1/articles/public/all?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
-        Page<ArticleDto> articles = articleService.getAllPublishedArticles(pageable);
+        Page<ArticleDto> articles = articleService.getAllPublishedArticles(null, pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
     }
