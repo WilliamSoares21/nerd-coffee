@@ -6,6 +6,7 @@ import com.nerdcoffe.domain.User;
 import com.nerdcoffe.domain.UserRole;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
+import com.nerdcoffe.dto.TagDto;
 import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.dto.UserDto;
 import com.nerdcoffe.exception.EntityNotFoundException;
@@ -141,6 +142,20 @@ public class ArticleService {
     Long currentUserId = getCurrentUserIdOrNull();
     return articleRepository.findAllPublished(pageable)
         .map(article -> mapToDto(article, currentUserId));
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> getTrendingArticles(Pageable pageable) {
+    log.info("Buscando artigos trending. Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
+    Long currentUserId = getCurrentUserIdOrNull();
+    return articleRepository.findTrending(pageable)
+        .map(article -> mapToDto(article, currentUserId));
+  }
+
+  @Transactional(readOnly = true)
+  public List<TagDto> getPopularTags() {
+    log.info("Buscando tags populares");
+    return articleRepository.findPopularTags();
   }
 
   @Transactional(readOnly = true)

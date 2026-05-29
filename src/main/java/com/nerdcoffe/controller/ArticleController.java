@@ -4,8 +4,10 @@ import com.nerdcoffe.dto.ApiResponseDto;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
 import com.nerdcoffe.dto.PageResponseDto;
+import com.nerdcoffe.dto.TagDto;
 import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.service.ArticleService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -106,6 +108,16 @@ public class ArticleController {
         Page<ArticleDto> articles = articleService.getAllPublishedArticles(pageable);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
         return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos recuperados com sucesso"));
+    }
+
+    @GetMapping("/public/trending")
+    @Operation(summary = "Listar artigos populares (trending)", description = "Retorna uma lista paginada de artigos publicados ordenados por engajamento/relevância")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getTrendingArticles(
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/public/trending?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.getTrendingArticles(pageable);
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos em alta recuperados com sucesso"));
     }
 
     @GetMapping("/public/search")
