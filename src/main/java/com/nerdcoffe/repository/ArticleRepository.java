@@ -28,4 +28,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT new com.nerdcoffe.dto.TagDto(t, COUNT(a.id)) FROM Article a JOIN a.tags t WHERE a.published = true GROUP BY t ORDER BY COUNT(a.id) DESC")
     List<TagDto> findPopularTags();
+
+    @Query("SELECT a FROM Article a WHERE a.published = true AND (LOWER(a.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.summary) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Article> searchGlobally(@Param("query") String query, Pageable pageable);
 }

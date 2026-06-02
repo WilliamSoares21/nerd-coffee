@@ -2,16 +2,19 @@ package com.nerdcoffe.service;
 
 import com.nerdcoffe.domain.Article;
 import com.nerdcoffe.domain.ArticleUpvote;
+import com.nerdcoffe.domain.SavedArticle;
 import com.nerdcoffe.domain.User;
 import com.nerdcoffe.domain.UserRole;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
+import com.nerdcoffe.dto.SavedResponseDto;
 import com.nerdcoffe.dto.TagDto;
 import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.dto.UserDto;
 import com.nerdcoffe.exception.EntityNotFoundException;
 import com.nerdcoffe.repository.ArticleRepository;
 import com.nerdcoffe.repository.ArticleUpvoteRepository;
+import com.nerdcoffe.repository.SavedArticleRepository;
 import com.nerdcoffe.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,9 @@ public class ArticleService {
 
   @Autowired
   private ArticleUpvoteRepository articleUpvoteRepository;
+
+  @Autowired
+  private SavedArticleRepository savedArticleRepository;
 
   @Transactional
   public ArticleDto createArticle(CreateArticleDto dto) {
@@ -216,6 +222,58 @@ public class ArticleService {
         .build();
   }
 
+  @Transactional
+  public SavedResponseDto toggleSaveArticle(Long articleId) {
+    log.info("Alternando salvamento para artigo: {}", articleId);
+
+    Article article = articleRepository.findById(articleId)
+        .orElseThrow(() -> new EntityNotFoundException("Artigo não encontrado com id: " + articleId));
+
+    User currentUser = getCurrentUser();
+
+    Optional<SavedArticle> existingSaved = savedArticleRepository.findByArticleAndUser(articleId, currentUser.getId());
+
+    boolean saved;
+    String message;
+
+    if (existingSaved.isPresent()) {
+      savedArticleRepository.delete(existingSaved.get());
+      saved = false;
+      message = "Artigo removido dos salvos";
+      log.info("Artigo {} removido dos salvos pelo usuário {}", articleId, currentUser.getId());
+    } else {
+      SavedArticle newSaved = SavedArticle.builder()
+          .article(article)
+          .user(currentUser)
+          .build();
+      savedArticleRepository.save(newSaved);
+      saved = true;
+      message = "Artigo salvo com sucesso";
+      log.info("Artigo {} salvo pelo usuário {}", articleId, currentUser.getId());
+    }
+
+    return SavedResponseDto.builder()
+        .saved(saved)
+        .message(message)
+        .build();
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> getSavedArticles(Pageable pageable) {
+    log.info("Buscando artigos salvos. Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
+    User currentUser = getCurrentUser();
+    return savedArticleRepository.findSavedArticlesByUserId(currentUser.getId(), pageable)
+        .map(article -> mapToDto(article, currentUser.getId()));
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> searchGlobally(String query, Pageable pageable) {
+    log.info("Buscando artigos globalmente com termo: {}", query);
+    Long currentUserId = getCurrentUserIdOrNull();
+    return articleRepository.searchGlobally(query, pageable)
+        .map(article -> mapToDto(article, currentUserId));
+  }
+
   private User getCurrentUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
@@ -249,6 +307,7 @@ public class ArticleService {
         && authentication.isAuthenticated()
         && !(authentication instanceof AnonymousAuthenticationToken);
     boolean isUpvoted = false;
+    boolean isSaved = false;
 
     if (isAuthenticated) {
       Long userId = currentUserId;
@@ -257,6 +316,7 @@ public class ArticleService {
         userId = currentUser.getId();
       }
       isUpvoted = articleUpvoteRepository.existsByArticleIdAndUserId(article.getId(), userId);
+      isSaved = savedArticleRepository.existsByArticleIdAndUserId(article.getId(), userId);
     }
 
     return ArticleDto.builder()
@@ -277,6 +337,7 @@ public class ArticleService {
         .publishedAt(article.getPublishedAt())
         .upvoteCount(upvoteCount)
         .userUpvoted(isUpvoted)
+        .isSaved(isSaved)
         .build();
   }
 

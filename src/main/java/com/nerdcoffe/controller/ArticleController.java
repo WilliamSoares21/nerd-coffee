@@ -4,6 +4,7 @@ import com.nerdcoffe.dto.ApiResponseDto;
 import com.nerdcoffe.dto.ArticleDto;
 import com.nerdcoffe.dto.CreateArticleDto;
 import com.nerdcoffe.dto.PageResponseDto;
+import com.nerdcoffe.dto.SavedResponseDto;
 import com.nerdcoffe.dto.TagDto;
 import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.service.ArticleService;
@@ -80,6 +81,41 @@ public class ArticleController {
         log.info("POST /api/v1/articles/{}/upvote", id);
         UpvoteResponseDto response = articleService.toggleUpvote(id);
         return ResponseEntity.ok(ApiResponseDto.success(response, response.getMessage()));
+    }
+
+    @PostMapping("/{id}/save")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(
+            summary = "Salvar/remover artigo dos favoritos",
+            description = "Funciona como um toggle: adiciona o artigo aos salvos se ainda não estiver, ou remove se já estiver salvo. " +
+                    "Disponível para todos os usuários autenticados (VIEWER, EDITOR, ADMIN)"
+    )
+    public ResponseEntity<ApiResponseDto<SavedResponseDto>> toggleSaveArticle(@PathVariable Long id) {
+        log.info("POST /api/v1/articles/{}/save", id);
+        SavedResponseDto response = articleService.toggleSaveArticle(id);
+        return ResponseEntity.ok(ApiResponseDto.success(response, response.getMessage()));
+    }
+
+    @GetMapping("/saved")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(summary = "Listar artigos salvos", description = "Retorna uma lista paginada dos artigos salvos pelo usuário autenticado")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> getSavedArticles(
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/saved?page={}&size={}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.getSavedArticles(pageable);
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Artigos salvos recuperados com sucesso"));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Pesquisar artigos globalmente", description = "Pesquisa artigos publicados por título ou resumo")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> searchGlobally(
+            @RequestParam("q") String query,
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/search?q={}&page={}&size={}", query, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ArticleDto> articles = articleService.searchGlobally(query, pageable);
+        PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Busca global realizada com sucesso"));
     }
 
     @GetMapping("/{id}")
