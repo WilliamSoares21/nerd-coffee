@@ -30,4 +30,7 @@ public class ArticleDto {
 
   @JsonProperty("userUpvoted")
   private Boolean userUpvoted;
+
+  @JsonProperty("isSaved")
+  private Boolean isSaved;
 }
