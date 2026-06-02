@@ -104,6 +104,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .active(user.getActive())
+                .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
