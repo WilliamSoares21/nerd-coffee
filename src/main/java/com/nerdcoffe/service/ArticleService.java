@@ -2,24 +2,31 @@ package com.nerdcoffe.service;
 
 import com.nerdcoffe.domain.Article;
 import com.nerdcoffe.domain.ArticleUpvote;
+import com.nerdcoffe.domain.Comment;
 import com.nerdcoffe.domain.SavedArticle;
 import com.nerdcoffe.domain.User;
 import com.nerdcoffe.domain.UserRole;
 import com.nerdcoffe.dto.ArticleDto;
+import com.nerdcoffe.dto.CommentDto;
+import com.nerdcoffe.dto.CreateCommentDto;
 import com.nerdcoffe.dto.CreateArticleDto;
 import com.nerdcoffe.dto.SavedResponseDto;
 import com.nerdcoffe.dto.TagDto;
 import com.nerdcoffe.dto.UpvoteResponseDto;
 import com.nerdcoffe.dto.UserDto;
+import com.nerdcoffe.dto.UserSummaryDto;
 import com.nerdcoffe.exception.EntityNotFoundException;
 import com.nerdcoffe.repository.ArticleRepository;
 import com.nerdcoffe.repository.ArticleUpvoteRepository;
+import com.nerdcoffe.repository.CommentRepository;
 import com.nerdcoffe.repository.SavedArticleRepository;
 import com.nerdcoffe.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,6 +54,9 @@ public class ArticleService {
 
   @Autowired
   private SavedArticleRepository savedArticleRepository;
+
+  @Autowired
+  private CommentRepository commentRepository;
 
   @Transactional
   public ArticleDto createArticle(CreateArticleDto dto) {
@@ -129,6 +139,45 @@ public class ArticleService {
     log.info("Artigo publicado com sucesso: {}", article.getId());
 
     return mapToDto(article);
+  }
+
+  @Transactional
+  public CommentDto addComment(Long articleId, CreateCommentDto dto) {
+    log.info("Adicionando comentário ao artigo: {}", articleId);
+
+    Article article = articleRepository.findById(articleId)
+        .orElseThrow(() -> new EntityNotFoundException("Artigo não encontrado com id: " + articleId));
+
+    User currentUser = getCurrentUser();
+    Comment comment = Comment.builder()
+        .content(dto.getContent())
+        .article(article)
+        .author(currentUser)
+        .build();
+
+    comment = commentRepository.save(comment);
+    log.info("Comentário criado com sucesso: {}", comment.getId());
+
+    return mapToCommentDto(comment);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<CommentDto> getComments(Long articleId, Pageable pageable) {
+    log.info("Buscando comentários do artigo: {}. Page: {}, Size: {}", articleId, pageable.getPageNumber(),
+        pageable.getPageSize());
+
+    if (!articleRepository.existsById(articleId)) {
+      throw new EntityNotFoundException("Artigo não encontrado com id: " + articleId);
+    }
+
+    Pageable sortedPageable = PageRequest.of(
+        pageable.getPageNumber(),
+        pageable.getPageSize(),
+        Sort.by(Sort.Direction.DESC, "createdAt")
+    );
+
+    return commentRepository.findByArticleId(articleId, sortedPageable)
+        .map(this::mapToCommentDto);
   }
 
   @Transactional(readOnly = true)
@@ -302,6 +351,7 @@ public class ArticleService {
 
   private ArticleDto mapToDto(Article article, Long currentUserId) {
     Long upvoteCount = articleUpvoteRepository.countByArticleId(article.getId());
+    Long commentsCount = commentRepository.countByArticleId(article.getId());
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     boolean isAuthenticated = authentication != null
         && authentication.isAuthenticated()
@@ -338,6 +388,23 @@ public class ArticleService {
         .upvoteCount(upvoteCount)
         .userUpvoted(isUpvoted)
         .isSaved(isSaved)
+        .commentsCount(commentsCount)
+        .build();
+  }
+
+  private CommentDto mapToCommentDto(Comment comment) {
+    User author = comment.getAuthor();
+    return CommentDto.builder()
+        .id(comment.getId())
+        .content(comment.getContent())
+        .author(UserSummaryDto.builder()
+            .id(author.getId())
+            .name(author.getName())
+            .username(author.getUsername())
+            .avatarUrl(null)
+            .build())
+        .createdAt(comment.getCreatedAt())
+        .updatedAt(comment.getUpdatedAt())
         .build();
   }
 

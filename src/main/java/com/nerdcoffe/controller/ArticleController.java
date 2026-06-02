@@ -2,6 +2,8 @@ package com.nerdcoffe.controller;
 
 import com.nerdcoffe.dto.ApiResponseDto;
 import com.nerdcoffe.dto.ArticleDto;
+import com.nerdcoffe.dto.CommentDto;
+import com.nerdcoffe.dto.CreateCommentDto;
 import com.nerdcoffe.dto.CreateArticleDto;
 import com.nerdcoffe.dto.PageResponseDto;
 import com.nerdcoffe.dto.SavedResponseDto;
@@ -68,6 +70,30 @@ public class ArticleController {
         log.info("PATCH /api/v1/articles/{}/publish", id);
         ArticleDto articleDto = articleService.publishArticle(id);
         return ResponseEntity.ok(ApiResponseDto.success(articleDto, "Artigo publicado com sucesso"));
+    }
+
+    @PostMapping("/{id}/comments")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(summary = "Adicionar comentário", description = "Adiciona um comentário ao artigo (usuário autenticado)")
+    public ResponseEntity<ApiResponseDto<CommentDto>> addComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCommentDto dto) {
+        log.info("POST /api/v1/articles/{}/comments", id);
+        CommentDto commentDto = articleService.addComment(id, dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponseDto.success(commentDto, "Comentário criado com sucesso"));
+    }
+
+    @GetMapping("/{id}/comments")
+    @Operation(summary = "Listar comentários do artigo", description = "Retorna uma lista paginada de comentários do artigo")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<CommentDto>>> getComments(
+            @PathVariable Long id,
+            @PageableDefault(size = 10) Pageable pageable) {
+        log.info("GET /api/v1/articles/{}/comments?page={}&size={}", id, pageable.getPageNumber(),
+                pageable.getPageSize());
+        Page<CommentDto> comments = articleService.getComments(id, pageable);
+        PageResponseDto<CommentDto> response = PageResponseDto.fromPage(comments);
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Comentários recuperados com sucesso"));
     }
 
     @PostMapping("/{id}/upvote")

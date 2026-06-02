@@ -33,4 +33,7 @@ public class ArticleDto {
 
   @JsonProperty("isSaved")
   private Boolean isSaved;
+
+  @JsonProperty("commentsCount")
+  private Long commentsCount;
 }
