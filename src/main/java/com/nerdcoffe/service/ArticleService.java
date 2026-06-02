@@ -211,11 +211,11 @@ public class ArticleService {
   }
 
   @Transactional(readOnly = true)
-  public Page<ArticleDto> getAllPublishedArticles(String tag, Pageable pageable) {
-    log.info("Buscando todos os artigos publicados com tag: {}. Page: {}, Size: {}", tag, pageable.getPageNumber(),
+  public Page<ArticleDto> getAllPublishedArticles(String tag, String author, Pageable pageable) {
+    log.info("Buscando todos os artigos publicados com tag: {} e autor: {}. Page: {}, Size: {}", tag, author, pageable.getPageNumber(),
         pageable.getPageSize());
     Long currentUserId = getCurrentUserIdOrNull();
-    return articleRepository.findAllPublished(tag, pageable)
+    return articleRepository.findAllPublished(tag, author, pageable)
         .map(article -> mapToDto(article, currentUserId));
   }
 
@@ -399,6 +399,7 @@ public class ArticleService {
             .name(article.getAuthor().getName())
             .email(article.getAuthor().getEmail())
             .role(article.getAuthor().getRole())
+            .bio(article.getAuthor().getBio())
             .build())
         .published(article.getPublished())
         .tags(article.getTags() == null ? List.of() : List.copyOf(article.getTags()))
