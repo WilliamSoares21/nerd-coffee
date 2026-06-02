@@ -180,6 +180,26 @@ public class ArticleService {
         .map(this::mapToCommentDto);
   }
 
+  @Transactional
+  public ArticleDto archiveArticle(Long id) {
+    log.info("Arquivando artigo: {}", id);
+
+    Article article = articleRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Artigo não encontrado com id: " + id));
+
+    User currentUser = getCurrentUser();
+    if (!article.getAuthor().getId().equals(currentUser.getId()) && !isAdmin()) {
+      log.warn("Usuário não autorizado a arquivar artigo: {}", id);
+      throw new AccessDeniedException("Você não tem permissão para arquivar este artigo");
+    }
+
+    article.setPublished(false);
+    article = articleRepository.save(article);
+    log.info("Artigo arquivado com sucesso: {}", article.getId());
+
+    return mapToDto(article);
+  }
+
   @Transactional(readOnly = true)
   public ArticleDto getArticleById(Long id) {
     log.info("Buscando artigo por id: {}", id);

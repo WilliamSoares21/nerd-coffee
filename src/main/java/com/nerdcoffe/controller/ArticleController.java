@@ -96,6 +96,15 @@ public class ArticleController {
         return ResponseEntity.ok(ApiResponseDto.success(response, "Comentários recuperados com sucesso"));
     }
 
+    @PatchMapping("/{id}/archive")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(summary = "Arquivar artigo", description = "Arquiva um artigo (apenas autor ou admin)")
+    public ResponseEntity<ApiResponseDto<ArticleDto>> archiveArticle(@PathVariable Long id) {
+        log.info("PATCH /api/v1/articles/{}/archive", id);
+        ArticleDto articleDto = articleService.archiveArticle(id);
+        return ResponseEntity.ok(ApiResponseDto.success(articleDto, "Artigo arquivado com sucesso"));
+    }
+
     @PostMapping("/{id}/upvote")
     @SecurityRequirement(name = "bearer-jwt")
     @Operation(
