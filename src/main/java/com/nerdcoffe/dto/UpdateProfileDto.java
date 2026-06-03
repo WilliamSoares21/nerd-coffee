@@ -1,25 +1,22 @@
 package com.nerdcoffe.dto;
 
-import com.nerdcoffe.domain.UserRole;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
-public class UserDto {
-    private Long id;
+public class UpdateProfileDto {
     private String name;
-    private String email;
-    private UserRole role;
-    private Boolean active;
+
+    @Size(max = 1000, message = "A biografia deve ter no máximo 1000 caracteres")
     private String bio;
+
     private String avatarUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

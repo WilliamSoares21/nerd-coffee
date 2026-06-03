@@ -49,8 +49,12 @@ public class User implements UserDetails {
   @Column(nullable = false)
   private UserRole role;
 
-  @Column(length = 500)
+  @Column(length = 1000)
   private String bio;
+
+  @Column(name = "avatar_url")
+  private String avatarUrl;
+
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
