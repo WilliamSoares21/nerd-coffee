@@ -52,7 +52,7 @@ public class User implements UserDetails {
   @Column(length = 1000)
   private String bio;
 
-  @Column(name = "avatar_url")
+  @Column(name = "avatar_url", length = 255)
   private String avatarUrl;
 
 

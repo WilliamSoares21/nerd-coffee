@@ -18,5 +18,6 @@ public class UpdateProfileDto {
     @Size(max = 1000, message = "A biografia deve ter no máximo 1000 caracteres")
     private String bio;
 
+    @Size(max = 255, message = "A URL do avatar deve ter no máximo 255 caracteres")
     private String avatarUrl;
 }
