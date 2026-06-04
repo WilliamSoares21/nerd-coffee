@@ -7,6 +7,7 @@ import com.nerdcoffe.exception.EntityNotFoundException;
 import com.nerdcoffe.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,19 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserProfileDto getUserProfile(String username) {
-        log.info("Buscando perfil do usuário: {}", username);
+        log.debug("Buscando perfil de utilizador");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com username: " + username));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
 
         return UserProfileDto.builder()
                 .id(user.getId())
                 .name(user.getName())
-                .username(user.getEmail())
+                .username(isAuthenticated ? user.getEmail() : null)
                 .avatarUrl(user.getAvatarUrl())
                 .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
