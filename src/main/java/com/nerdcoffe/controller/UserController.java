@@ -24,23 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Usuários", description = "Endpoints de gerenciamento de usuários")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+  @Autowired
+  private UserService userService;
 
-    @GetMapping("/{username}")
-    @Operation(summary = "Obter perfil público de usuário", description = "Retorna os dados públicos do perfil do usuário com base no username")
-    public ResponseEntity<ApiResponseDto<UserProfileDto>> getUserProfile(@PathVariable String username) {
-        log.info("GET /api/v1/users/{}", username);
-        UserProfileDto userProfile = userService.getUserProfile(username);
-        return ResponseEntity.ok(ApiResponseDto.success(userProfile, "Perfil do usuário recuperado com sucesso"));
-    }
+  @GetMapping("/{username}")
+  @Operation(summary = "Obter perfil público de usuário", description = "Retorna os dados públicos do perfil do usuário com base no username")
+  public ResponseEntity<ApiResponseDto<UserProfileDto>> getUserProfile(@PathVariable String username) {
+    log.info("GET /api/v1/users/{}", username);
+    UserProfileDto userProfile = userService.getUserProfile(username);
+    return ResponseEntity.ok(ApiResponseDto.success(userProfile, "Perfil do usuário recuperado com sucesso"));
+  }
 
-    @PutMapping("/profile")
-    @SecurityRequirement(name = "bearer-jwt")
-    @Operation(summary = "Atualizar perfil do usuário logado", description = "Atualiza name, bio e avatarUrl do usuário autenticado no sistema")
-    public ResponseEntity<ApiResponseDto<UserProfileDto>> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
-        log.info("PUT /api/v1/users/profile");
-        UserProfileDto userProfile = userService.updateProfile(dto);
-        return ResponseEntity.ok(ApiResponseDto.success(userProfile, "Perfil atualizado com sucesso"));
-    }
+  @PutMapping("/profile")
+  @SecurityRequirement(name = "bearer-jwt")
+  @Operation(summary = "Atualizar perfil do usuário logado", description = "Atualiza username, name, bio e avatarUrl do usuário autenticado no sistema")
+  public ResponseEntity<ApiResponseDto<UserProfileDto>> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
+    log.info("PUT /api/v1/users/profile");
+    UserProfileDto userProfile = userService.updateProfile(dto);
+    return ResponseEntity.ok(ApiResponseDto.success(userProfile, "Perfil atualizado com sucesso"));
+  }
 }

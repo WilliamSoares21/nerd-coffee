@@ -345,8 +345,9 @@ public class ArticleService {
 
   private User getCurrentUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
-    return userRepository.findByEmail(email)
+    String identifier = authentication.getName();
+    return userRepository.findByEmail(identifier)
+        .or(() -> userRepository.findByUsername(identifier))
         .orElseThrow(() -> new EntityNotFoundException("Usuário atual não encontrado"));
   }
 
@@ -401,6 +402,7 @@ public class ArticleService {
             .role(article.getAuthor().getRole())
             .bio(article.getAuthor().getBio())
             .avatarUrl(article.getAuthor().getAvatarUrl())
+            .username(article.getAuthor().getUsername())
             .build())
         .published(article.getPublished())
         .tags(article.getTags() == null ? List.of() : List.copyOf(article.getTags()))

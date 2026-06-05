@@ -1,5 +1,6 @@
 package com.nerdcoffe.dto;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +21,8 @@ public class UpdateProfileDto {
 
     @Size(max = 255, message = "A URL do avatar deve ter no máximo 255 caracteres")
     private String avatarUrl;
+
+    @Size(max = 50, message = "Username deve ter no máximo 50 caracteres")
+    @Pattern(regexp = "^[a-zA-Z0-9_.-]+$", message = "Username inválido")
+    private String username;
 }

@@ -117,4 +117,99 @@ class UserServiceTest {
         assertEquals("Old Bio", result.getBio()); // remains unchanged
         assertEquals("old-avatar.png", result.getAvatarUrl()); // remains unchanged
     }
+
+    @Test
+    void shouldUpdateUsernameSuccessfully() {
+        // Arrange
+        String email = "test@example.com";
+        User user = User.builder()
+                .id(1L)
+                .name("Old Name")
+                .email(email)
+                .password("password")
+                .role(UserRole.VIEWER)
+                .build();
+
+        UpdateProfileDto dto = UpdateProfileDto.builder()
+                .username("new_username")
+                .build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("new_username")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        UserProfileDto result = userService.updateProfile(dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("new_username", result.getUsername());
+        assertEquals("new_username", user.getUsername());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUsernameAlreadyExists() {
+        // Arrange
+        String email = "test@example.com";
+        User user = User.builder()
+                .id(1L)
+                .name("Old Name")
+                .email(email)
+                .password("password")
+                .role(UserRole.VIEWER)
+                .username("my_username")
+                .build();
+
+        UpdateProfileDto dto = UpdateProfileDto.builder()
+                .username("taken_username")
+                .build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("taken_username")).thenReturn(true);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.updateProfile(dto)
+        );
+        assertEquals("Este username já está em uso", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenUpdatingToSameUsername() {
+        // Arrange
+        String email = "test@example.com";
+        User user = User.builder()
+                .id(1L)
+                .name("Old Name")
+                .email(email)
+                .password("password")
+                .role(UserRole.VIEWER)
+                .username("my_username")
+                .build();
+
+        UpdateProfileDto dto = UpdateProfileDto.builder()
+                .username("my_username")
+                .build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("my_username")).thenReturn(true);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        UserProfileDto result = userService.updateProfile(dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("my_username", result.getUsername());
+    }
 }

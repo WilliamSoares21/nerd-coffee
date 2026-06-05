@@ -46,12 +46,22 @@ public class AuthService {
             throw new BusinessException("Email já cadastrado no sistema");
         }
 
+        String baseUsername = dto.getEmail().split("@")[0].replaceAll("[^a-zA-Z0-9_.-]", "");
+        if (baseUsername.isEmpty()) {
+            baseUsername = "user";
+        }
+        if (baseUsername.length() > 40) {
+            baseUsername = baseUsername.substring(0, 40);
+        }
+        String generatedUsername = baseUsername + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+
         User user = User.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .role(UserRole.VIEWER)
                 .active(true)
+                .username(generatedUsername)
                 .build();
 
         user = userRepository.save(user);
@@ -105,6 +115,8 @@ public class AuthService {
                 .role(user.getRole())
                 .active(user.getActive())
                 .bio(user.getBio())
+                .avatarUrl(user.getAvatarUrl())
+                .username(user.getUsername())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

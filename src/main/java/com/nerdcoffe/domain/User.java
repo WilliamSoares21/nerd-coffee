@@ -55,6 +55,9 @@ public class User implements UserDetails {
   @Column(name = "avatar_url", length = 255)
   private String avatarUrl;
 
+  @Column(unique = true, length = 50)
+  private String username;
+
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -83,7 +86,7 @@ public class User implements UserDetails {
 
   @Override
   public String getUsername() {
-    return email;
+    return username != null && !username.isBlank() ? username : email;
   }
 
   @Override

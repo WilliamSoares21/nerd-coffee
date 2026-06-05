@@ -24,17 +24,13 @@ public class UserService {
     public UserProfileDto getUserProfile(String username) {
         log.debug("Buscando perfil de utilizador");
         User user = userRepository.findByUsername(username)
+                .or(() -> userRepository.findByEmail(username))
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com username: " + username));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null
-                && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken);
 
         return UserProfileDto.builder()
                 .id(user.getId())
                 .name(user.getName())
-                .username(isAuthenticated ? user.getEmail() : null)
+                .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
                 .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
@@ -49,9 +45,10 @@ public class UserService {
             throw new org.springframework.security.authentication.BadCredentialsException("Usuário não autenticado");
         }
 
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com email: " + email));
+        String identifier = authentication.getName();
+        User user = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByUsername(identifier))
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com identificador: " + identifier));
 
         if (dto.getName() != null) {
             user.setName(dto.getName());
@@ -62,13 +59,20 @@ public class UserService {
         if (dto.getAvatarUrl() != null) {
             user.setAvatarUrl(dto.getAvatarUrl());
         }
+        if (dto.getUsername() != null) {
+            String newUsername = dto.getUsername();
+            if (userRepository.existsByUsername(newUsername) && !newUsername.equals(user.getUsername())) {
+                throw new IllegalArgumentException("Este username já está em uso");
+            }
+            user.setUsername(newUsername);
+        }
 
         user = userRepository.save(user);
 
         return UserProfileDto.builder()
                 .id(user.getId())
                 .name(user.getName())
-                .username(user.getEmail())
+                .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
                 .bio(user.getBio())
                 .createdAt(user.getCreatedAt())

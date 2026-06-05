@@ -20,6 +20,7 @@ public class UserDto {
     private Boolean active;
     private String bio;
     private String avatarUrl;
+    private String username;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
