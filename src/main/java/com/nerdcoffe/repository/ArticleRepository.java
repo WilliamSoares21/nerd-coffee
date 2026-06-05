@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     
-    @Query("SELECT a FROM Article a JOIN a.author u LEFT JOIN a.tags t WHERE a.published = true AND (:tag IS NULL OR t = :tag) AND (:authorUsername IS NULL OR u.email = :authorUsername) ORDER BY a.publishedAt DESC")
+    @Query("SELECT a FROM Article a JOIN a.author u LEFT JOIN a.tags t WHERE a.published = true AND (:tag IS NULL OR t = :tag) AND (:authorUsername IS NULL OR u.username = :authorUsername OR u.email = :authorUsername) ORDER BY a.publishedAt DESC")
     Page<Article> findAllPublished(@Param("tag") String tag, @Param("authorUsername") String authorUsername, Pageable pageable);
     
     @Query("SELECT a FROM Article a WHERE a.author = :author ORDER BY a.createdAt DESC")
