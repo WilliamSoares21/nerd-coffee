@@ -7,6 +7,7 @@ import com.nerdcoffe.dto.LoginRequestDto;
 import com.nerdcoffe.dto.LoginResponseDto;
 import com.nerdcoffe.dto.UserDto;
 import com.nerdcoffe.exception.BusinessException;
+import com.nerdcoffe.exception.ConflictException;
 import com.nerdcoffe.exception.UnauthorizedException;
 import com.nerdcoffe.repository.UserRepository;
 import com.nerdcoffe.security.JwtProvider;
@@ -43,7 +44,7 @@ public class AuthService {
 
         if (userRepository.existsByEmail(dto.getEmail())) {
             log.warn("Email já existe: {}", dto.getEmail());
-            throw new BusinessException("Email já cadastrado no sistema");
+            throw new ConflictException("Usuário com email já cadastrado");
         }
 
         String baseUsername = dto.getEmail().split("@")[0].replaceAll("[^a-zA-Z0-9_.-]", "");
@@ -53,7 +54,20 @@ public class AuthService {
         if (baseUsername.length() > 40) {
             baseUsername = baseUsername.substring(0, 40);
         }
-        String generatedUsername = baseUsername + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+
+        String generatedUsername;
+        int attempts = 0;
+        boolean unique;
+        do {
+            generatedUsername = baseUsername + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+            unique = !userRepository.existsByUsername(generatedUsername);
+            attempts++;
+        } while (!unique && attempts < 5);
+
+        if (!unique) {
+            log.warn("Falha ao gerar username único para base: {}", baseUsername);
+            throw new RuntimeException("Falha ao gerar username único");
+        }
 
         User user = User.builder()
                 .name(dto.getName())
