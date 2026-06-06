@@ -7,6 +7,7 @@ import com.nerdcoffe.domain.User;
 import com.nerdcoffe.domain.UserRole;
 import com.nerdcoffe.dto.UpdateProfileDto;
 import com.nerdcoffe.dto.UserProfileDto;
+import com.nerdcoffe.exception.ConflictException;
 import com.nerdcoffe.repository.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -174,11 +175,11 @@ class UserServiceTest {
         when(userRepository.existsByUsername("taken_username")).thenReturn(true);
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ConflictException exception = assertThrows(
+                ConflictException.class,
                 () -> userService.updateProfile(dto)
         );
-        assertEquals("Este username já está em uso", exception.getMessage());
+        assertEquals("Username já existente", exception.getMessage());
     }
 
     @Test

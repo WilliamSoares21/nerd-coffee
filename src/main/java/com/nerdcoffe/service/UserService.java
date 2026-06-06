@@ -3,6 +3,7 @@ package com.nerdcoffe.service;
 import com.nerdcoffe.domain.User;
 import com.nerdcoffe.dto.UpdateProfileDto;
 import com.nerdcoffe.dto.UserProfileDto;
+import com.nerdcoffe.exception.ConflictException;
 import com.nerdcoffe.exception.EntityNotFoundException;
 import com.nerdcoffe.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ public class UserService {
         if (dto.getUsername() != null) {
             String newUsername = dto.getUsername();
             if (userRepository.existsByUsername(newUsername) && !newUsername.equals(user.getUsername())) {
-                throw new IllegalArgumentException("Este username já está em uso");
+                throw new ConflictException("Username já existente");
             }
             user.setUsername(newUsername);
         }
