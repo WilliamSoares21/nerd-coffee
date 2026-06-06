@@ -86,10 +86,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        // Endpoint de upvote: qualquer usuário autenticado pode dar/remover upvote
-                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/upvote").authenticated()
                         // Criar artigo: qualquer usuário autenticado pode criar
                         .requestMatchers(HttpMethod.POST, "/api/v1/articles").authenticated()
+                        // Endpoint de upvote (curtir): qualquer usuário autenticado pode dar/remover upvote
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/upvote").authenticated()
+                        // Salvar artigo: qualquer usuário autenticado pode salvar/remover
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/save").authenticated()
+                        // Comentar artigo: qualquer usuário autenticado pode comentar
+                        .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/comments").authenticated()
                         // Editar artigo: validação de autorização feita na service (apenas autor ou admin)
                         .requestMatchers(HttpMethod.PUT, "/api/v1/articles/**").authenticated()
                         // Deletar artigo: validação de autorização feita na service (apenas autor ou admin)
