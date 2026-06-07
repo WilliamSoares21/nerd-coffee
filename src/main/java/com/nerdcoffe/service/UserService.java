@@ -61,7 +61,7 @@ public class UserService {
             user.setAvatarUrl(dto.getAvatarUrl());
         }
         if (dto.getUsername() != null) {
-            String newUsername = dto.getUsername();
+            String newUsername = dto.getUsername().toLowerCase();
             if (userRepository.existsByUsername(newUsername) && !newUsername.equals(user.getUsername())) {
                 throw new ConflictException("Username já existente");
             }

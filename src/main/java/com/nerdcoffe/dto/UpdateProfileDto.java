@@ -23,6 +23,6 @@ public class UpdateProfileDto {
     private String avatarUrl;
 
     @Size(max = 50, message = "Username deve ter no máximo 50 caracteres")
-    @Pattern(regexp = "^[a-zA-Z0-9_.-]+$", message = "Username inválido")
+    @Pattern(regexp = "^[a-zA-Z0-9_.-]+$", message = "O username deve conter apenas letras, números, underscores, pontos e hifens")
     private String username;
 }

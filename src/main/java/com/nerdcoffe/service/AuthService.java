@@ -59,7 +59,7 @@ public class AuthService {
         int attempts = 0;
         boolean unique;
         do {
-            generatedUsername = baseUsername + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+            generatedUsername = baseUsername.toLowerCase() + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
             unique = !userRepository.existsByUsername(generatedUsername);
             attempts++;
         } while (!unique && attempts < 5);

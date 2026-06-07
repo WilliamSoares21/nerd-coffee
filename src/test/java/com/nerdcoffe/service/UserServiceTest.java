@@ -132,7 +132,7 @@ class UserServiceTest {
                 .build();
 
         UpdateProfileDto dto = UpdateProfileDto.builder()
-                .username("new_username")
+                .username("New_Username")
                 .build();
 
         when(securityContext.getAuthentication()).thenReturn(authentication);

@@ -32,7 +32,7 @@ class AuthServiceTest {
     void shouldRegisterSuccessfullyOnFirstAttempt() {
         CreateUserDto dto = CreateUserDto.builder()
                 .name("John Doe")
-                .email("john@example.com")
+                .email("John@example.com")
                 .password("password123")
                 .build();
 
