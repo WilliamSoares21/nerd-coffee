@@ -19,6 +19,7 @@ import com.nerdcoffe.exception.EntityNotFoundException;
 import com.nerdcoffe.repository.ArticleRepository;
 import com.nerdcoffe.repository.ArticleUpvoteRepository;
 import com.nerdcoffe.repository.CommentRepository;
+import com.nerdcoffe.repository.CommentUpvoteRepository;
 import com.nerdcoffe.repository.SavedArticleRepository;
 import com.nerdcoffe.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Slf4j
@@ -57,6 +59,9 @@ public class ArticleService {
 
   @Autowired
   private CommentRepository commentRepository;
+
+  @Autowired
+  private CommentUpvoteRepository commentUpvoteRepository;
 
   @Transactional
   public ArticleDto createArticle(CreateArticleDto dto) {
@@ -149,16 +154,24 @@ public class ArticleService {
         .orElseThrow(() -> new EntityNotFoundException("Artigo não encontrado com id: " + articleId));
 
     User currentUser = getCurrentUser();
+    
+    Comment parentComment = null;
+    if (dto.getParentId() != null) {
+      parentComment = commentRepository.findById(dto.getParentId())
+          .orElseThrow(() -> new EntityNotFoundException("Comentário pai não encontrado com id: " + dto.getParentId()));
+    }
+
     Comment comment = Comment.builder()
         .content(dto.getContent())
         .article(article)
         .author(currentUser)
+        .parentComment(parentComment)
         .build();
 
     comment = commentRepository.save(comment);
     log.info("Comentário criado com sucesso: {}", comment.getId());
 
-    return mapToCommentDto(comment);
+    return mapToCommentDto(comment, currentUser.getId());
   }
 
   @Transactional(readOnly = true)
@@ -176,8 +189,9 @@ public class ArticleService {
         Sort.by(Sort.Direction.DESC, "createdAt")
     );
 
-    return commentRepository.findByArticleId(articleId, sortedPageable)
-        .map(this::mapToCommentDto);
+    Long currentUserId = getCurrentUserIdOrNull();
+    return commentRepository.findByArticleIdAndParentCommentIsNull(articleId, sortedPageable)
+        .map(c -> mapToCommentDto(c, currentUserId));
   }
 
   @Transactional
@@ -416,8 +430,9 @@ public class ArticleService {
         .build();
   }
 
-  private CommentDto mapToCommentDto(Comment comment) {
+  private CommentDto mapToCommentDto(Comment comment, Long currentUserId) {
     User author = comment.getAuthor();
+    
     return CommentDto.builder()
         .id(comment.getId())
         .content(comment.getContent())
@@ -429,6 +444,10 @@ public class ArticleService {
             .build())
         .createdAt(comment.getCreatedAt())
         .updatedAt(comment.getUpdatedAt())
+        .parentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
+        .upvoteCount(comment.getUpvotes() != null ? comment.getUpvotes().size() : 0)
+        .userUpvoted(currentUserId != null && comment.getUpvotes() != null && comment.getUpvotes().stream().anyMatch(u -> u.getUser().getId().equals(currentUserId)))
+        .replies(comment.getReplies() != null ? comment.getReplies().stream().map(reply -> mapToCommentDto(reply, currentUserId)).collect(Collectors.toList()) : List.of())
         .build();
   }
 

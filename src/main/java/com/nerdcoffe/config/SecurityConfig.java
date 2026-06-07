@@ -100,6 +100,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/articles/**").authenticated()
                         // PATCH (publish): validação de autorização feita na service (apenas autor ou admin)
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/articles/**").authenticated()
+                        // Interações de Comentários: curtir e apagar comentários exigem autenticação
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/upvote").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

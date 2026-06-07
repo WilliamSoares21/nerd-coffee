@@ -14,4 +14,6 @@ public class CreateCommentDto {
 
     @NotBlank(message = "Conteúdo do comentário é obrigatório")
     private String content;
+
+    private Long parentId;
 }
