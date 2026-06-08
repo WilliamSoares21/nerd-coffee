@@ -23,8 +23,8 @@ public class CreateArticleDto {
     @Size(min = 10, message = "Conteúdo deve ter pelo menos 10 caracteres")
     private String content;
 
-    @Size(max = 500, message = "Resumo não pode exceder 500 caracteres")
+    @Size(max = 255, message = "O resumo deve ter no máximo 255 caracteres")
     private String summary;
 
-    private List<String> tags;
+    private List<@Size(max = 100, message = "Cada tag deve ter no máximo 100 caracteres") String> tags;
 }
