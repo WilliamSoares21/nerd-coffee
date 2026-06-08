@@ -143,14 +143,15 @@ public class ArticleController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Pesquisar artigos globalmente", description = "Pesquisa artigos publicados por título ou resumo")
-    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> searchGlobally(
+    @Operation(summary = "Pesquisar artigos publicados", description = "Pesquisa artigos publicados por título, resumo ou conteúdo")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ArticleDto>>> searchArticles(
             @RequestParam("q") String query,
-            @PageableDefault(size = 10) Pageable pageable) {
-        log.info("GET /api/v1/articles/search?q={}&page={}&size={}", query, pageable.getPageNumber(), pageable.getPageSize());
-        Page<ArticleDto> articles = articleService.searchGlobally(query, pageable);
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        log.info("GET /api/v1/articles/search?q={}&page={}&size={}", query, page, size);
+        Page<ArticleDto> articles = articleService.searchArticles(query, page, size);
         PageResponseDto<ArticleDto> response = PageResponseDto.fromPage(articles);
-        return ResponseEntity.ok(ApiResponseDto.success(response, "Busca global realizada com sucesso"));
+        return ResponseEntity.ok(ApiResponseDto.success(response, "Busca realizada com sucesso"));
     }
 
     @GetMapping("/{id}")

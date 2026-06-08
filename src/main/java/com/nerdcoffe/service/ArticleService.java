@@ -357,6 +357,15 @@ public class ArticleService {
         .map(article -> mapToDto(article, currentUserId));
   }
 
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> searchArticles(String query, int page, int size) {
+    log.info("Buscando artigos com termo: {}, page: {}, size: {}", query, page, size);
+    Pageable pageable = PageRequest.of(page, size);
+    Long currentUserId = getCurrentUserIdOrNull();
+    return articleRepository.searchPublishedArticles(query, pageable)
+        .map(article -> mapToSummaryDto(article, currentUserId));
+  }
+
   private User getCurrentUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String identifier = authentication.getName();
@@ -378,6 +387,10 @@ public class ArticleService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     return authentication.getAuthorities().stream()
         .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+  }
+
+  private ArticleDto mapToSummaryDto(Article article, Long currentUserId) {
+    return mapToDto(article, currentUserId);
   }
 
   private ArticleDto mapToDto(Article article) {

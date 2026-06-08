@@ -97,4 +97,19 @@ class ArticleControllerTest {
                 .andExpect(jsonPath("$.data").doesNotExist())
                 .andExpect(jsonPath("$.errors").doesNotExist());
     }
+
+    @Test
+    void shouldAllowPublicSearchWithoutAuthentication() throws Exception {
+        org.springframework.data.domain.Page<com.nerdcoffe.dto.ArticleDto> emptyPage = org.springframework.data.domain.Page.empty();
+        when(articleService.searchArticles(anyString(), anyInt(), anyInt())).thenReturn(emptyPage);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/articles/search")
+                        .param("q", "spring boot")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Busca realizada com sucesso"));
+    }
 }

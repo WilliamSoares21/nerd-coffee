@@ -31,4 +31,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a WHERE a.published = true AND (LOWER(a.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.summary) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Article> searchGlobally(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT a FROM Article a JOIN a.author u LEFT JOIN a.tags t WHERE a.published = true AND (LOWER(a.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.summary) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.content) LIKE LOWER(CONCAT('%', :query, '%'))) ORDER BY a.publishedAt DESC")
+    Page<Article> searchPublishedArticles(@Param("query") String query, Pageable pageable);
 }

@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/articles/public/**").permitAll()
+                        .requestMatchers("/api/v1/articles/search").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/profile").authenticated()
                         .requestMatchers("/api/v1/users/**").permitAll()
                         .requestMatchers("/api/v1/tags").permitAll()
