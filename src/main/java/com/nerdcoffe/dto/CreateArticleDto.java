@@ -16,7 +16,7 @@ import java.util.List;
 public class CreateArticleDto {
 
     @NotBlank(message = "Título é obrigatório")
-    @Size(min = 5, max = 200, message = "Título deve ter entre 5 e 200 caracteres")
+    @Size(min = 5, max = 120, message = "O título deve ter entre 5 e 120 caracteres")
     private String title;
 
     @NotBlank(message = "Conteúdo é obrigatório")

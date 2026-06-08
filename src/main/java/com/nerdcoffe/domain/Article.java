@@ -24,7 +24,7 @@ public class Article {
     private Long id;
 
     @NotBlank(message = "Título é obrigatório")
-    @Column(nullable = false)
+    @Column(nullable = false, length = 120)
     private String title;
 
     @NotBlank(message = "Conteúdo é obrigatório")

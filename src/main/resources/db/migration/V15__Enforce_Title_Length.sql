@@ -1,0 +1,2 @@
+UPDATE articles SET title = SUBSTRING(title, 1, 120) WHERE LENGTH(title) > 120;
+ALTER TABLE articles ALTER COLUMN title TYPE VARCHAR(120);
