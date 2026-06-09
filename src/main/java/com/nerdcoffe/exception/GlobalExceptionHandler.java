@@ -25,6 +25,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponseDto.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(UnverifiedAccountException.class)
+    public ResponseEntity<ApiResponseDto<?>> handleUnverifiedAccountException(UnverifiedAccountException ex) {
+        log.error("Unverified account: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponseDto.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponseDto<?>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         log.error("Type mismatch parameter: {}", ex.getMessage());

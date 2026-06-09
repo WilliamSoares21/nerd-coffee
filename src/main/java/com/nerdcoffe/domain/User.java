@@ -58,6 +58,9 @@ public class User implements UserDetails {
   @Column(unique = true, length = 50)
   private String username;
 
+  @Column(name = "email_verified", nullable = false)
+  private boolean emailVerified;
+
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package com.nerdcoffe.service;
 
 import com.nerdcoffe.domain.User;
 import com.nerdcoffe.domain.UserRole;
+import com.nerdcoffe.domain.VerificationToken;
 import com.nerdcoffe.dto.CreateUserDto;
 import com.nerdcoffe.dto.LoginRequestDto;
 import com.nerdcoffe.dto.LoginResponseDto;
@@ -9,7 +10,9 @@ import com.nerdcoffe.dto.UserDto;
 import com.nerdcoffe.exception.BusinessException;
 import com.nerdcoffe.exception.ConflictException;
 import com.nerdcoffe.exception.UnauthorizedException;
+import com.nerdcoffe.exception.UnverifiedAccountException;
 import com.nerdcoffe.repository.UserRepository;
+import com.nerdcoffe.repository.VerificationTokenRepository;
 import com.nerdcoffe.security.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,12 @@ public class AuthService {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private VerificationTokenRepository verificationTokenRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public UserDto register(CreateUserDto dto) {
@@ -76,10 +85,21 @@ public class AuthService {
                 .role(UserRole.VIEWER)
                 .active(true)
                 .username(generatedUsername)
+                .emailVerified(false)
                 .build();
 
         user = userRepository.save(user);
         log.info("Usuário registrado com sucesso: {}", user.getId());
+
+        String token = java.util.UUID.randomUUID().toString();
+        VerificationToken verificationToken = VerificationToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(java.time.LocalDateTime.now().plusHours(24))
+                .build();
+        verificationTokenRepository.save(verificationToken);
+
+        emailService.sendVerificationEmail(user.getEmail(), token);
 
         return mapToDto(user);
     }
@@ -90,6 +110,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Email ou senha inválidos"));
+
+        if (!user.isEmailVerified()) {
+            throw new UnverifiedAccountException("Conta não verificada. Verifique seu e-mail.");
+        }
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             log.warn("Senha inválida para usuário: {}", dto.getEmail());
@@ -119,6 +143,25 @@ public class AuthService {
                 .roles(roles)
                 .user(mapToDto(user))
                 .build();
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        log.info("Verificando e-mail com token: {}", token);
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new BusinessException("Token inválido ou inexistente"));
+
+        if (verificationToken.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
+            verificationTokenRepository.delete(verificationToken);
+            throw new BusinessException("Token expirado");
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        verificationTokenRepository.delete(verificationToken);
+        log.info("E-mail verificado com sucesso para o usuário: {}", user.getEmail());
     }
 
     private UserDto mapToDto(User user) {
