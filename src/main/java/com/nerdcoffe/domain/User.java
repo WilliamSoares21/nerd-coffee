@@ -58,8 +58,9 @@ public class User implements UserDetails {
   @Column(unique = true, length = 50)
   private String username;
 
+  @Builder.Default
   @Column(name = "email_verified", nullable = false)
-  private boolean emailVerified;
+  private boolean emailVerified = false;
 
 
   @Column(nullable = false, updatable = false)
